@@ -6,31 +6,42 @@ import {
   createAsyncStore,
   json,
 } from "@solidjs/router";
-import { db } from "~/lib/drizzle/db";
+import { db, prepared_add_content_file } from "~/lib/drizzle/db";
 import { SelectContentFile, contentFile } from "~/lib/drizzle/schema";
 import { eq, ne } from "drizzle-orm";
 import { For } from "solid-js";
 import { Trash2Icon } from "lucide-solid";
+import { prepared_load_content_file } from "~/lib/drizzle/db";
+import { nanoid } from "nanoid";
 // import "./index.css";
 
 // get all files from the database
 const getContentFiles = cache(async () => {
   "use server";
   return (
-    ((await db
-      .select()
-      .from(contentFile)
-      .where(eq(contentFile.isMarkedDeleted, false))) as SelectContentFile[]) ||
-    []
+    //   ((await db
+    //     .select()
+    //     .from(contentFile)
+    //     .where(eq(contentFile.isMarkedDeleted, false))) as SelectContentFile[]) ||
+    //   []
+    // );
+    await prepared_load_content_file.all()
   );
 }, "notes");
 
-// create a new file
+// create a new filez
 const createContentFileAction = action(async (formData: FormData) => {
   "use server";
 
-  /// Insert a new note into the database
-  await db.insert(contentFile).values({
+  // Insert a new note into the database
+  // await db.insert(contentFile).values({
+  //   title: formData.get("note") as string,
+  //   filehash: formData.get("filehash") as string,
+  // });
+  const test_uuid = crypto.randomUUID();
+  console.log(test_uuid);
+  await prepared_add_content_file.run({
+    id: test_uuid,
     title: formData.get("note") as string,
     filehash: formData.get("filehash") as string,
   });
